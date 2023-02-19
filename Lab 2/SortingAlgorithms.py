@@ -29,13 +29,10 @@ for i in range(50000):
 
 def heap_sort(arr):
     n = len(arr)
-    # Build a max heap from the input array
     build_max_heap(arr, n)
-    # Extract elements from the heap one by one and place them at the end of the array
     for i in range(n - 1, 0, -1):
-        # Swap the root node with the last node
         arr[0], arr[i] = arr[i], arr[0]
-        heapify(arr, i, 0)  # Heapify the reduced heap
+        heapify(arr, i, 0)
     return arr
 
 
