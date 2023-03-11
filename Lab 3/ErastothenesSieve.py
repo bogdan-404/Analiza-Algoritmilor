@@ -173,30 +173,3 @@ plt.xlabel('Algorithms')
 plt.ylabel('Time in seconds')
 
 plt.show()
-
-# headers = ["1000", "10000", "20000"]
-
-# algorithm_1 = pt.PrettyTable(headers)
-# algorithm_1.add_row(results_1[0], results_2[0], results_3[0])
-# print(algorithm_1)
-# algorithm_2 = pt.PrettyTable()
-# algorithm_2.field_names = ["1000", "10000", "20000"]
-# algorithm_2.add_row(results_1[1], results_2[1], results_3[1])
-
-# algorithm_3 = pt.PrettyTable()
-# algorithm_3.field_names = ["1000", "10000", "20000"]
-# algorithm_3.add_row(results_1[2], results_2[2], results_3[2])
-
-# algorithm_4 = pt.PrettyTable()
-# algorithm_4.field_names = ["1000", "10000", "20000"]
-# algorithm_4.add_row(results_1[3], results_2[3], results_3[3])
-
-# algorithm_5 = pt.PrettyTable()
-# algorithm_5.field_names = ["1000", "10000", "20000"]
-# algorithm_5.add_row(results_1[4], results_2[4], results_3[4])
-
-# print(algorithm_1)
-# print(algorithm_2)
-# print(algorithm_3)
-# print(algorithm_4)
-# print(algorithm_5)
