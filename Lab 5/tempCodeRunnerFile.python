@@ -1,0 +1,2 @@
+    nx.draw(G, pos, with_labels=True, node_color='skyblue',
+            node_size=1500, font_size=20, font_weight='bold', arrows=False)

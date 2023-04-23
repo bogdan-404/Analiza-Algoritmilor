@@ -1,0 +1,279 @@
+import matplotlib.pyplot as plt
+import time
+
+
+def dijkstra(graph, start):
+    shortest_distances = {node: float('inf') for node in graph}
+    previous_nodes = {node: None for node in graph}
+    shortest_distances[start] = 0
+    unvisited_nodes = list(graph.keys())
+    current_node = start
+    while current_node is not None:
+        for neighbor, weight in graph[current_node].items():
+            tentative_distance = shortest_distances[current_node] + weight
+            if tentative_distance < shortest_distances[neighbor]:
+                shortest_distances[neighbor] = tentative_distance
+                previous_nodes[neighbor] = current_node
+        unvisited_nodes.remove(current_node)
+        min_distance = float('inf')
+        current_node = None
+        for node in unvisited_nodes:
+            if shortest_distances[node] < min_distance:
+                min_distance = shortest_distances[node]
+                current_node = node
+    return shortest_distances
+
+
+def floyd_warshall(graph):
+    nodes = list(graph.keys())
+    node_indices = {node: i for i, node in enumerate(nodes)}
+    size = len(nodes)
+    infinity = float('inf')
+    matrix = [[infinity] * size for i in range(size)]
+    for i in range(size):
+        matrix[i][i] = 0
+    for node, edges in graph.items():
+        i = node_indices[node]
+        for to_node, cost in edges.items():
+            j = node_indices[to_node]
+            matrix[i][j] = cost
+    for k in range(size):
+        for i in range(size):
+            for j in range(size):
+                if matrix[i][j] > matrix[i][k] + matrix[k][j]:
+                    matrix[i][j] = matrix[i][k] + matrix[k][j]
+    distances = [{nodes[j]: matrix[i][j]
+                  for j in range(size)} for i in range(size)]
+    return distances
+
+
+runtimes = []
+
+graph = {
+    'A': {'B': 1, 'C': 4},
+    'B': {'C': 2, 'D': 2},
+    'C': {'D': 3},
+    'D': {'C': 1}
+}
+
+
+graph_dense_10 = {
+    'A': {'B': 1, 'C': 4, 'D': 2, 'E': 3, 'F': 8, 'G': 9, 'H': 10, 'I': 11, 'J': 12},
+    'B': {'A': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 9, 'G': 10, 'H': 11, 'I': 12, 'J': 13},
+    'C': {'A': 4, 'B': 2, 'D': 1, 'E': 2, 'F': 7, 'G': 8, 'H': 9, 'I': 10, 'J': 11},
+    'D': {'A': 2, 'B': 3, 'C': 1, 'E': 1, 'F': 6, 'G': 7, 'H': 8, 'I': 9, 'J': 10},
+    'E': {'A': 3, 'B': 4, 'C': 2, 'D': 1, 'F': 5, 'G': 6, 'H': 7, 'I': 8, 'J': 9},
+    'F': {'A': 8, 'B': 9, 'C': 7, 'D': 6, 'E': 5, 'G': 1, 'H': 2, 'I': 3, 'J': 4},
+    'G': {'A': 9, 'B': 10, 'C': 8, 'D': 7, 'E': 6, 'F': 1, 'H': 1, 'I': 2, 'J': 3},
+    'H': {'A': 10, 'B': 11, 'C': 9, 'D': 8, 'E': 7, 'F': 2, 'G': 1, 'I': 1, 'J': 2},
+    'I': {'A': 11, 'B': 12, 'C': 10, 'D': 9, 'E': 8, 'F': 3, 'G': 2, 'H': 1, 'J': 1},
+    'J': {'A': 12, 'B': 13, 'C': 11, 'D': 10, 'E': 9, 'F': 4, 'G': 3, 'H': 2, 'I': 1}
+}
+
+
+graph_sparse_10 = {
+    'A': {'E': 3, 'G': 9},
+    'B': {'I': 12, 'J': 13},
+    'C': {'B': 2},
+    'D': {'F': 6},
+    'E': {'G': 4, 'J': 7},
+    'F': {'C': 7},
+    'G': {'C': 5},
+    'H': {'D': 8},
+    'I': {'D': 1},
+    'J': {'F': 4, 'H': 2}
+}
+
+
+graph_sparse_20 = {
+    'A': {'E': 3, 'G': 9},
+    'B': {'I': 12, 'J': 13},
+    'C': {'B': 2},
+    'D': {'F': 6},
+    'E': {'G': 4, 'J': 7},
+    'F': {'C': 7},
+    'G': {'C': 5},
+    'H': {'D': 8},
+    'I': {'D': 1},
+    'J': {'F': 4, 'H': 2},
+    'K': {'L': 1},
+    'L': {'M': 1},
+    'M': {'N': 1},
+    'N': {'O': 1},
+    'O': {'P': 1},
+    'P': {'Q': 1},
+    'Q': {'R': 1},
+    'R': {'S': 1},
+    'S': {'T': 1},
+    'T': {'L': 1},
+}
+
+
+graph_dense_20 = {
+    'A': {'B': 1, 'C': 4, 'D': 2, 'E': 3, 'F': 8, 'G': 9, 'H': 10, 'I': 11, 'J': 12, 'K': 1, 'L': 4, 'M': 2, 'N': 3, 'O': 8, 'P': 9, 'Q': 10, 'R': 11, 'S': 12, 'T': 1},
+    'B': {'A': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 9, 'G': 10, 'H': 11, 'I': 12, 'J': 13, 'K': 2, 'L': 1, 'M': 4, 'N': 2, 'O': 3, 'P': 8, 'Q': 9, 'R': 10, 'S': 11, 'T': 12},
+    'C': {'A': 4, 'B': 2, 'D': 1, 'E': 2, 'F': 7, 'G': 8, 'H': 9, 'I': 10, 'J': 11, 'K': 3, 'L': 2, 'M': 1, 'N': 4, 'O': 2, 'P': 3, 'Q': 8, 'R': 9, 'S': 10, 'T': 11},
+    'D': {'A': 2, 'B': 3, 'C': 1, 'E': 1, 'F': 6, 'G': 7, 'H': 8, 'I': 9, 'J': 10, 'K': 4, 'L': 3, 'M': 2, 'N': 1, 'O': 4, 'P': 2, 'Q': 3, 'R': 8, 'S': 9, 'T': 10},
+    'E': {'A': 3, 'B': 4, 'C': 2, 'D': 1, 'F': 5, 'G': 6, 'H': 7, 'I': 8, 'J': 9, 'K': 5, 'L': 4, 'M': 3, 'N': 2, 'O': 1, 'P': 4, 'Q': 2, 'R': 3, 'S': 8, 'T': 9},
+    'F': {'A': 8, 'B': 9, 'C': 7, 'D': 6, 'E': 5, 'G': 1, 'H': 2, 'I': 3, 'J': 4, 'K': 6, 'L': 5, 'M': 4, 'N': 3, 'O': 2, 'P': 1, 'Q': 4, 'R': 2, 'S': 3, 'T': 8},
+    'G': {'A': 9, 'B': 10, 'C': 8, 'D': 7, 'E': 6, 'F': 1, 'H': 1, 'I': 2, 'J': 3, 'K': 7, 'L': 6, 'M': 5, 'N': 4, 'O': 3, 'P': 2, 'Q': 1, 'R': 4, 'S': 2, 'T': 3},
+    'H': {'A': 10, 'B': 11, 'C': 9, 'D': 8, 'E': 7, 'F': 2, 'G': 1, 'I': 1, 'J': 2, 'K': 8, 'L': 7, 'M': 6, 'N': 5, 'O': 4, 'P': 3, 'Q': 2, 'R': 1, 'S': 4, 'T': 2},
+    'I': {'A': 11, 'B': 12, 'C': 10, 'D': 9, 'E': 8, 'F': 3, 'G': 2, 'H': 1, 'J': 1, 'K': 9, 'L': 8, 'M': 7, 'N': 6, 'O': 5, 'P': 4, 'Q': 3, 'R': 2, 'S': 1, 'T': 4},
+    'J': {'A': 12, 'B': 13, 'C': 11, 'D': 10, 'E': 9, 'F': 4, 'G': 3, 'H': 2, 'I': 1, 'K': 10, 'L': 9, 'M': 8, 'N': 7, 'O': 6, 'P': 5, 'Q': 4, 'R': 3, 'S': 2, 'T': 1},
+    'K': {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7, 'H': 8, 'I': 9, 'J': 10, 'L': 1, 'M': 2, 'N': 3, 'O': 4, 'P': 5, 'Q': 6, 'R': 7, 'S': 8, 'T': 9},
+    'L': {'A': 2, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7, 'I': 8, 'J': 9, 'K': 1, 'M': 1, 'N': 2, 'O': 3, 'P': 4, 'Q': 5, 'R': 6, 'S': 7, 'T': 8},
+    'M': {'A': 3, 'B': 2, 'C': 1, 'D': 2, 'E': 3, 'F': 4, 'G': 5, 'H': 6, 'I': 7, 'J': 8, 'K': 2, 'L': 1, 'N': 1, 'O': 2, 'P': 3, 'Q': 4, 'R': 5, 'S': 6, 'T': 7},
+    'N': {'A': 4, 'B': 3, 'C': 2, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'H': 5, 'I': 6, 'J': 7, 'K': 3, 'L': 2, 'M': 1, 'O': 1, 'P': 2, 'Q': 3, 'R': 4, 'S': 5, 'T': 6},
+    'O': {'A': 5, 'B': 4, 'C': 3, 'D': 2, 'E': 1, 'F': 2, 'G': 3, 'H': 4, 'I': 5, 'J': 6, 'K': 4, 'L': 3, 'M': 2, 'N': 1, 'P': 1, 'Q': 2, 'R': 3, 'S': 4, 'T': 5},
+    'P': {'A': 6, 'B': 5, 'C': 4, 'D': 3, 'E': 2, 'F': 3, 'G': 2, 'H': 3, 'I': 4, 'J': 5, 'K': 5, 'L': 4, 'M': 3, 'N': 2, 'O': 1, 'Q': 1, 'R': 2, 'S': 3, 'T': 4},
+    'Q': {'A': 7, 'B': 6, 'C': 5, 'D': 4, 'E': 3, 'F': 4, 'G': 3, 'H': 2, 'I': 3, 'J': 4, 'K': 6, 'L': 5, 'M': 4, 'N': 3, 'O': 2, 'P': 1, 'R': 1, 'S': 2, 'T': 3},
+    'R': {'A': 8, 'B': 7, 'C': 6, 'D': 5, 'E': 4, 'F': 5, 'G': 4, 'H': 3, 'I': 2, 'J': 3, 'K': 7, 'L': 6, 'M': 5, 'N': 4, 'O': 3, 'P': 2, 'Q': 1, 'S': 1, 'T': 2},
+    'S': {'A': 9, 'B': 8, 'C': 7, 'D': 6, 'E': 5, 'F': 6, 'G': 5, 'H': 4, 'I': 3, 'J': 2, 'K': 8, 'L': 7, 'M': 6, 'N': 5, 'O': 4, 'P': 3, 'Q': 2, 'R': 1, 'T': 1},
+    'T': {'A': 10, 'B': 9, 'C': 8, 'D': 7, 'E': 6, 'F': 7, 'G': 6, 'H': 5, 'I': 4, 'J': 3, 'K': 9, 'L': 8, 'M': 7, 'N': 6, 'O': 5, 'P': 4, 'Q': 3, 'R': 2, 'S': 1}
+}
+
+
+start = time.time()
+for i in range(20):
+    for start_node in graph_sparse_10.keys():
+        distances = dijkstra(graph_sparse_10, start_node)
+        for node, distance in distances.items():
+            print(f"Distance from {start_node} to {node}: {distance}")
+            pass
+end = time.time()
+runtimes.append((end - start)/20)
+
+start = time.time()
+for i in range(20):
+    for start_node in graph_dense_10.keys():
+        distances = dijkstra(graph_dense_10, start_node)
+        for node, distance in distances.items():
+            print(f"Distance from {start_node} to {node}: {distance}")
+            pass
+end = time.time()
+runtimes.append((end - start)/20)
+
+start = time.time()
+for i in range(20):
+    for start_node in graph_sparse_20.keys():
+        distances = dijkstra(graph_sparse_20, start_node)
+        for node, distance in distances.items():
+            print(f"Distance from {start_node} to {node}: {distance}")
+            pass
+end = time.time()
+runtimes.append((end - start)/20)
+
+start = time.time()
+for i in range(20):
+    for start_node in graph_dense_20.keys():
+        distances = dijkstra(graph_dense_20, start_node)
+        for node, distance in distances.items():
+            print(f"Distance from {start_node} to {node}: {distance}")
+            pass
+end = time.time()
+runtimes.append((end - start)/20)
+
+
+start = time.time()
+for i in range(20):
+    distances = floyd_warshall(graph_sparse_10)
+    nodes = list(graph_sparse_10.keys())
+    for i, distance_dict in enumerate(distances):
+        node = nodes[i]
+        for to_node, distance in distance_dict.items():
+            print(f"Distance from {node} to {to_node}: {distance}")
+            pass
+end = time.time()
+runtimes.append((end - start)/20)
+
+
+start = time.time()
+for i in range(20):
+    distances = floyd_warshall(graph_dense_10)
+    nodes = list(graph_dense_10.keys())
+    for i, distance_dict in enumerate(distances):
+        start_node = nodes[i]
+        for to_node, distance in distance_dict.items():
+            print(f"Distance from {start_node} to {to_node}: {distance}")
+            pass
+end = time.time()
+runtimes.append((end - start)/20)
+
+
+start = time.time()
+for i in range(20):
+    distances = floyd_warshall(graph_sparse_20)
+    nodes = list(graph_sparse_20.keys())
+    for i, distance_dict in enumerate(distances):
+        node = nodes[i]
+        for to_node, distance in distance_dict.items():
+            print(f"Distance from {node} to {to_node}: {distance}")
+            pass
+end = time.time()
+runtimes.append((end - start)/20)
+
+
+start = time.time()
+for i in range(20):
+    distances = floyd_warshall(graph_dense_20)
+    nodes = list(graph_dense_20.keys())
+    for i, distance_dict in enumerate(distances):
+        start_node = nodes[i]
+        for to_node, distance in distance_dict.items():
+            print(f"Distance from {start_node} to {to_node}: {distance}")
+            pass
+end = time.time()
+runtimes.append((end - start)/20)
+
+start = time.time()
+for i in range(20):
+    start_node = 'A'
+    distances = dijkstra(graph_dense_20, start_node)
+    for node, distance in distances.items():
+        print(f"Distance from {start_node} to {node}: {distance}")
+        pass
+end = time.time()
+runtimes.append((end - start)/20)
+
+start = time.time()
+for i in range(20):
+    distances = floyd_warshall(graph_dense_20)
+    for i, distance_dict in enumerate(distances):
+        start_node = 'A'
+        for to_node, distance in distance_dict.items():
+            print(f"Distance from {start_node} to {to_node}: {distance}")
+            pass
+end = time.time()
+runtimes.append((end - start)/20)
+
+
+print(runtimes)
+
+
+plt.figure(1)
+plt.bar(['Sparse Graph with 10 Vertices', 'Dense Graph with 10 Vertices', 'Sparse Graph with 20 Vertices', 'Dense Graph with 20 Vertices'],
+        [runtimes[0], runtimes[1], runtimes[2], runtimes[3]], color='green')
+plt.title('Dijkstra Algorithm Runtime')
+plt.ylabel('Time in seconds')
+
+plt.figure(2)
+plt.bar(['Sparse Graph with 10 Vertices', 'Dense Graph with 10 Vertices', 'Sparse Graph with 20 Vertices', 'Dense Graph with 20 Vertices'],
+        [runtimes[4], runtimes[5], runtimes[6], runtimes[7]], color='blue')
+plt.title('Floyd-Warshall Algorithm Runtime')
+plt.ylabel('Time in seconds')
+
+plt.figure(3)
+plt.bar(['Dijkstra', 'Floyd-Warshall'],
+        [runtimes[8], runtimes[9]], color='red')
+plt.title('Runtime for finding Distance from Vertex A to the rest Vertices')
+plt.xlabel(
+    'Dense Graph with 20 Vertices')
+
+plt.figure(4)
+plt.bar(['Dijkstra', 'Floyd-Warshall'],
+        [runtimes[3], runtimes[9]], color='red')
+plt.title('Runtime for finding Distance from each Vertex to the rest of the Vertices')
+plt.xlabel(
+    'Dense Graph with 20 Vertices')
+
+plt.show()
